@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Commerce Demo</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background: #f5f7fb;
+        color: #1f2937;
+        margin: 0;
+        padding: 40px;
+      }
+      .container {
+        max-width: 900px;
+        margin: 0 auto;
+      }
+      .card {
+        background: white;
+        border-radius: 12px;
+        padding: 24px;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+      }
+      button {
+        padding: 10px 16px;
+        background: #2563eb;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+      }
+      ul {
+        padding-left: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="card">
+        <h1>Commerce Demo</h1>
+        <button id="loadInventory">Load inventory</button>
+        <button id="createOrder">Create sample order</button>
+        <h2>Inventory</h2>
+        <ul id="inventoryList"></ul>
+        <pre id="result"></pre>
+      </div>
+    </div>
+
+    <script>
+      async function fetchJson(url, options = {}) {
+        const response = await fetch(url, {
+          headers: { 'Content-Type': 'application/json' },
+          ...options,
+        });
+        return response.json();
+      }
+
+      document.getElementById('loadInventory').addEventListener('click', async () => {
+        try {
+          const data = await fetchJson('/api/inventory');
+          const list = document.getElementById('inventoryList');
+          list.innerHTML = '';
+          data.forEach((item) => {
+            const li = document.createElement('li');
+            li.textContent = `${item.name} - $${item.price} (${item.stock} in stock)`;
+            list.appendChild(li);
+          });
+          document.getElementById('result').textContent = JSON.stringify(data, null, 2);
+        } catch (error) {
+          document.getElementById('result').textContent = `Error: ${error.message}`;
+        }
+      });
+
+      document.getElementById('createOrder').addEventListener('click', async () => {
+        try {
+          const payload = {
+            customer: 'demo-customer',
+            items: [{ productId: 1, quantity: 2 }],
+            total: 40,
+          };
+          const result = await fetchJson('/api/orders', {
+            method: 'POST',
+            body: JSON.stringify(payload),
+          });
+          document.getElementById('result').textContent = JSON.stringify(result, null, 2);
+        } catch (error) {
+          document.getElementById('result').textContent = `Error: ${error.message}`;
+        }
+      });
+    </script>
+  </body>
+</html>

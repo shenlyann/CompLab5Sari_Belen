@@ -2,49 +2,60 @@ services:
   frontend:
     build: ./frontend
     ports:
-      - "8080:80"
+      - "3000:80"
     depends_on:
       - api-gateway
 
   api-gateway:
     build: ./api-gateway
     ports:
-      - "3000:3000"
+      - "3001:3000"
     environment:
-      INVENTORY_SERVICE_URL: http://inventory-service:3001
-      ORDER_SERVICE_URL: http://order-service:3002
-      PAYMENT_SERVICE_URL: http://payment-service:3003
-      NOTIFICATION_SERVICE_URL: http://notification-service:3004
+      INVENTORY_SERVICE_URL: http://inventory-service:3002
+      ORDER_SERVICE_URL: http://order-service:3003
+      PAYMENT_SERVICE_URL: http://payment-service:3004
+      NOTIFICATION_SERVICE_URL: http://notification-service:3005
+      RABBITMQ_URL: amqp://guest:guest@rabbitmq:5672
     depends_on:
       - inventory-service
       - order-service
       - payment-service
       - notification-service
+      - rabbitmq
 
   inventory-service:
     build: ./inventory-service
-    ports:
-      - "3001:3001"
-    environment:
-      PORT: 3001
-
-  order-service:
-    build: ./order-service
     ports:
       - "3002:3002"
     environment:
       PORT: 3002
 
-  payment-service:
-    build: ./payment-service
+  order-service:
+    build: ./order-service
     ports:
       - "3003:3003"
     environment:
       PORT: 3003
 
-  notification-service:
-    build: ./notification-service
+  payment-service:
+    build: ./payment-service
     ports:
       - "3004:3004"
     environment:
       PORT: 3004
+
+  notification-service:
+    build: ./notification-service
+    ports:
+      - "3005:3005"
+    environment:
+      PORT: 3005
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
